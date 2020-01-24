@@ -12,7 +12,7 @@ from keras.models import (
 )
 
 
-class CAE:
+class CAE(object):
     '''
     Convolutional AutoEncoder Model
     '''

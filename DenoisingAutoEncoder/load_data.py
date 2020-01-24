@@ -7,7 +7,6 @@ from keras.preprocessing.image import (
     ImageDataGenerator
 )
 
-from IPython.display import display_png
 
 class LoadMNISTData(object):
 
