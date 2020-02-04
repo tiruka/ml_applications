@@ -10,7 +10,7 @@ from keras.preprocessing.image import (
 
 class LoadMNISTData(object):
 
-    def run(self, debug=False):
+    def run(self, kind, debug=False):
         x_train, x_test = self.load_mnist_data()
         masked_x_train = self.make_masking_noise_data(x_train)
         masked_x_test = self.make_masking_noise_data(x_test)
@@ -20,7 +20,10 @@ class LoadMNISTData(object):
             array_to_img(x_train[0]).save('./debug_img_dir/original.png')
             array_to_img(masked_x_train[0]).save('./debug_img_dir/masked_noise.png')
             array_to_img(gaussian_x_train[0]).save('./debug_img_dir/gaussian_noise.png')
-
+        if kind == 'masked':
+            return (x_train, x_test), (masked_x_train, masked_x_test)
+        elif kind == 'gaussian':
+            return (x_train, x_test), (gaussian_x_train, gaussian_x_test)
 
     def load_mnist_data(self):
         (x_train, _), (x_test, _) = mnist.load_data()
@@ -48,5 +51,5 @@ class LoadMNISTData(object):
         return gaussian_data
 
 if __name__ == "__main__":
-    a = LoadMNISTData()
-    a.run(debug=True)
+    loader = LoadMNISTData()
+    loader.run(kind='both', debug=True)

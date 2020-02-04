@@ -12,7 +12,7 @@ from keras.models import (
 )
 
 
-class CAE(object):
+class DAE(object):
     '''
     Convolutional AutoEncoder Model
     '''
@@ -39,7 +39,8 @@ class CAE(object):
             loss='binary_crossentropy',
         )
         initial_weights = autoencoder.get_weights()
-        autoencoder.summary()
+        # autoencoder.summary()
+        return autoencoder, initial_weights
 
 if __name__ == "__main__":
-    CAE().build_model()
+    DAE().build_model()
