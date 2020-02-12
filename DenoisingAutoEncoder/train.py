@@ -1,5 +1,5 @@
 from PIL import Image
-
+from keras.preprocessing.image import array_to_img
 from load_data import LoadMNISTData
 from model import DAE
 
@@ -32,8 +32,9 @@ class TrainDAE:
         comparable_img.save(f'./comparable_img/{num}_original.png')
 
     def _get_concat_horizontal_multi_resize(self, im_list, resample=Image.BICUBIC):
+        im_list = [array_to_img(x) for x in im_list]
         min_height = min(im.height for im in im_list)
-        im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height),resample=resample)
+        im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
                         for im in im_list]
         total_width = sum(im.width for im in im_list_resize)
         dst = Image.new('RGB', (total_width, min_height))
