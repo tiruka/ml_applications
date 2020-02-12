@@ -1,0 +1,6 @@
+import os
+
+BASE_DIR = os.path.realpath(os.path.join(os.path.dirname(__name__)))
+VAR_DIR = os.path.join(BASE_DIR, 'var')
+DEBUG_IMG = os.path.join(VAR_DIR, 'debug_img')
+COMPARABLE_IMG = os.path.join(VAR_DIR, 'comparable_img')

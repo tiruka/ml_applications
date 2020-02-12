@@ -1,7 +1,12 @@
+import os
+
 from PIL import Image
 from keras.preprocessing.image import array_to_img
 from load_data import LoadMNISTData
 from model import DAE
+
+import settings
+
 
 class TrainDAE:
 
@@ -29,7 +34,7 @@ class TrainDAE:
 
     def save(self, num, x_test, noised_x_test, noised_preds):
         comparable_img = self._get_concat_horizontal_multi_resize([x_test, noised_x_test, noised_preds])
-        comparable_img.save(f'./comparable_img/{num}_original.png')
+        comparable_img.save(os.path.join(settings.COMPARABLE_IMG, f'{num}_original.png'))
 
     def _get_concat_horizontal_multi_resize(self, im_list, resample=Image.BICUBIC):
         im_list = [array_to_img(x) for x in im_list]

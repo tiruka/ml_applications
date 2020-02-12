@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from keras.datasets import mnist
 from keras.preprocessing.image import (
@@ -7,19 +9,20 @@ from keras.preprocessing.image import (
     ImageDataGenerator
 )
 
+import settings
 
 class LoadMNISTData(object):
 
-    def run(self, kind, debug=False):
+    def run(self, kind=None, debug=False):
         x_train, x_test = self.load_mnist_data()
         masked_x_train = self.make_masking_noise_data(x_train)
         masked_x_test = self.make_masking_noise_data(x_test)
         gaussian_x_train = self.make_gaussian_noise_data(x_train)
         gaussian_x_test = self.make_gaussian_noise_data(x_test)
         if debug:
-            array_to_img(x_train[0]).save('./debug_img_dir/original.png')
-            array_to_img(masked_x_train[0]).save('./debug_img_dir/masked_noise.png')
-            array_to_img(gaussian_x_train[0]).save('./debug_img_dir/gaussian_noise.png')
+            array_to_img(x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'original.png'))
+            array_to_img(masked_x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'masked_noise.png'))
+            array_to_img(gaussian_x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'gaussian_noise.png'))
         if kind == 'masked':
             return (x_train, x_test), (masked_x_train, masked_x_test)
         elif kind == 'gaussian':
@@ -52,4 +55,4 @@ class LoadMNISTData(object):
 
 if __name__ == "__main__":
     loader = LoadMNISTData()
-    loader.run(kind='both', debug=True)
+    loader.run(debug=True)
