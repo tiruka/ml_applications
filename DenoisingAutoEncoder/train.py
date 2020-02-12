@@ -10,11 +10,12 @@ import settings
 
 class TrainDAE:
 
-    def __init__(self):
+    def __init__(self, kind):
+        self.kind = kind
         self.autoencoder, init_weights = DAE().build_model()
 
-    def run(self, kind, debug=False):
-        (x_train, x_test), (noised_x_train, noised_x_test) = LoadMNISTData().run(kind)
+    def train(self, debug=False):
+        (x_train, x_test), (noised_x_train, noised_x_test) = LoadMNISTData().run(self.kind)
         self._train(noised_x_train, x_train)
         noised_preds = self._predict(noised_x_test)
         for i in range(10):
@@ -28,6 +29,7 @@ class TrainDAE:
             batch_size=20,
             shuffle=True,
         )
+        self.autoencoder.save_weights(os.path.join(settings.MODEL, f'{self.kind}_gae_model.h5'))
 
     def _predict(self, noised_x_test):
         return self.autoencoder.predict(noised_x_test)
