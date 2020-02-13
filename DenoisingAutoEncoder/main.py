@@ -1,7 +1,7 @@
 import os
 import glob
 
-from train import TrainDAE
+from train_predict import TrainDAE
 import settings
 
 class Initializer:
