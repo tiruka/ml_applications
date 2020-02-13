@@ -31,14 +31,14 @@ class TrainDAE(DAE, ImageStore):
 
     def __init__(self, mode, is_mnist=False):
         self.mode = mode
-        self.autoencoder, _ = self.build_model()
+        self.autoencoder, _ = self.build_model(is_mnist)
         self.is_mnist = is_mnist
 
-    def train(self, debug=False):
+    def train(self):
         (x_train, x_test), (noised_x_train, noised_x_test) = DataLoader().run(mode=self.mode, is_mnist=self.is_mnist)
         self._train(noised_x_train, x_train)
         noised_preds = self._predict(noised_x_test)
-        for i in range(5):
+        for i in range(1):
             np_img_list = [x_test[i], noised_x_test[i], noised_preds[i]]
             self.save(i, np_img_list)
 
@@ -46,8 +46,8 @@ class TrainDAE(DAE, ImageStore):
         self.autoencoder.fit(
             X,
             Y,
-            epochs=1,
-            batch_size=20,
+            epochs=100,
+            batch_size=64,
             shuffle=True,
         )
         self.autoencoder.save_weights(os.path.join(settings.MODEL, f'{self.mode}_gae_model.h5'))

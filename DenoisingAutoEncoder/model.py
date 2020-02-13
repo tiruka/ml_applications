@@ -22,7 +22,7 @@ class DAE(object):
         if is_mnist:
             input_shape = (28, 28, 1)
         else:
-            input_shape = (*settings.SIZE, 1)
+            input_shape = (*settings.SIZE, 3)
         autoencoder = Sequential()
         # Encoder Part
         autoencoder.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding='same', input_shape=input_shape))
@@ -34,7 +34,7 @@ class DAE(object):
         autoencoder.add(UpSampling2D((2, 2)))
         autoencoder.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding='same'))
         autoencoder.add(UpSampling2D((2, 2)))
-        autoencoder.add(Conv2D(filters=1, kernel_size=(3, 3), strides=(1, 1), activation='sigmoid', padding='same'))
+        autoencoder.add(Conv2D(filters=input_shape[2], kernel_size=(3, 3), strides=(1, 1), activation='sigmoid', padding='same'))
         autoencoder.compile(
             optimizer='adam',
             loss='binary_crossentropy',

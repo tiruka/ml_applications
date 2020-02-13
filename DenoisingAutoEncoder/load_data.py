@@ -47,8 +47,6 @@ class DataLoader(object):
         images = glob.glob(os.path.join(settings.DATA, '*.png'))
         np_images = np.array([img_to_array(load_img(path, target_size=(settings.SIZE))) for path in images])
         x_train, x_test = self._generate_cross_validation_data(np_images)
-        x_train = x_train.reshape(-1, *settings.SIZE, 1)
-        x_test = x_test.reshape(-1, *settings.SIZE, 1)
         x_train = self._normalize(x_train)
         x_test = self._normalize(x_test)
         return x_train, x_test
