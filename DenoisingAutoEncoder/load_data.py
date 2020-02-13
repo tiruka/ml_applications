@@ -13,7 +13,7 @@ import settings
 
 class LoadMNISTData(object):
 
-    def run(self, kind=None, debug=False):
+    def run(self, mode=None, debug=False):
         x_train, x_test = self.load_mnist_data()
         masked_x_train = self.make_masking_noise_data(x_train)
         masked_x_test = self.make_masking_noise_data(x_test)
@@ -23,9 +23,9 @@ class LoadMNISTData(object):
             array_to_img(x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'original.png'))
             array_to_img(masked_x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'masked_noise.png'))
             array_to_img(gaussian_x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'gaussian_noise.png'))
-        if kind == 'masked':
+        if mode == 'masked':
             return (x_train, x_test), (masked_x_train, masked_x_test)
-        elif kind == 'gaussian':
+        elif mode == 'gaussian':
             return (x_train, x_test), (gaussian_x_train, gaussian_x_test)
 
     def load_mnist_data(self):

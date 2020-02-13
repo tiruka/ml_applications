@@ -29,12 +29,12 @@ class ImageStore:
 
 class TrainDAE(DAE, ImageStore):
 
-    def __init__(self, kind):
-        self.kind = kind
+    def __init__(self, mode):
+        self.mode = mode
         self.autoencoder, _ = self.build_model()
 
     def train(self, debug=False):
-        (x_train, x_test), (noised_x_train, noised_x_test) = LoadMNISTData().run(self.kind)
+        (x_train, x_test), (noised_x_train, noised_x_test) = LoadMNISTData().run(self.mode)
         self._train(noised_x_train, x_train)
         noised_preds = self._predict(noised_x_test)
         for i in range(10):
@@ -49,7 +49,7 @@ class TrainDAE(DAE, ImageStore):
             batch_size=20,
             shuffle=True,
         )
-        self.autoencoder.save_weights(os.path.join(settings.MODEL, f'{self.kind}_gae_model.h5'))
+        self.autoencoder.save_weights(os.path.join(settings.MODEL, f'{self.mode}_gae_model.h5'))
 
     def _predict(self, noised_x_test):
         return self.autoencoder.predict(noised_x_test)
@@ -71,7 +71,7 @@ class PredictDAE(DAE, ImageStore):
         return self.autoencoder.predict(X)
 
     def _load_model(self):
-        self.autoencoder.load_weights(os.path.join(settings.MODEL, f'{self.kind}_gae_model.h5'))
+        self.autoencoder.load_weights(os.path.join(settings.MODEL, f'{self.mode}_gae_model.h5'))
 
     def _load_img(self, path):
-        return img_to_array(load_img(path, target_size=()))
+        return img_to_array(load_img(path, target_size=(settings.SIZE)))
