@@ -18,4 +18,4 @@ class Initializer:
 
 if __name__ == "__main__":
     Initializer().cleanup()
-    TrainDAE('masked').train()
+    TrainDAE('masked', is_mnist=True).train()

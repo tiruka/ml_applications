@@ -2,7 +2,7 @@ import os
 
 from PIL import Image
 from keras.preprocessing.image import array_to_img, load_img
-from load_data import LoadMNISTData
+from load_data import DataLoader
 from model import DAE
 
 import settings
@@ -29,12 +29,13 @@ class ImageStore:
 
 class TrainDAE(DAE, ImageStore):
 
-    def __init__(self, mode):
+    def __init__(self, mode, is_mnist=False):
         self.mode = mode
         self.autoencoder, _ = self.build_model()
+        self.is_mnist = is_mnist
 
     def train(self, debug=False):
-        (x_train, x_test), (noised_x_train, noised_x_test) = LoadMNISTData().run(self.mode)
+        (x_train, x_test), (noised_x_train, noised_x_test) = DataLoader().run(mode=self.mode, is_mnist=self.is_mnist)
         self._train(noised_x_train, x_train)
         noised_preds = self._predict(noised_x_test)
         for i in range(10):

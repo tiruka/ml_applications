@@ -1,6 +1,8 @@
+import glob
 import os
 
 import numpy as np
+from sklearn import model_selection
 from keras.datasets import mnist
 from keras.preprocessing.image import (
     load_img,
@@ -11,10 +13,13 @@ from keras.preprocessing.image import (
 
 import settings
 
-class LoadMNISTData(object):
+class DataLoader(object):
 
-    def run(self, mode=None, debug=False):
-        x_train, x_test = self.load_mnist_data()
+    def run(self, mode=None, debug=False, is_mnist=False):
+        if is_mnist:
+            x_train, x_test = self.load_mnist_data()
+        else:
+            x_train, x_test = self.load_data()
         masked_x_train = self.make_masking_noise_data(x_train)
         masked_x_test = self.make_masking_noise_data(x_test)
         gaussian_x_train = self.make_gaussian_noise_data(x_train)
@@ -34,6 +39,20 @@ class LoadMNISTData(object):
         x_test = x_test.reshape(-1, 28, 28, 1)
         x_train = self._normalize(x_train)
         x_test = self._normalize(x_test)
+        return x_train, x_test
+
+    def load_data(self):
+        images = glob.glob(os.path.join(settings.DATA, '*.png'))
+        np_images = [img_to_array(load_img(path, target_size=(settings.SIZE))) for path in images]
+        x_train, x_test = self._generate_cross_validation_data(np_images)
+        x_train = x_train.reshape(-1, *settings.SIZE, 1)
+        x_test = x_test.reshape(-1, *settings.SIZE, 1)
+        x_train = self._normalize(x_train)
+        x_test = self._normalize(x_test)
+        return x_train, x_test
+
+    def _generate_cross_validation_data(self, X):
+        x_train, x_test = model_selection.train_test_split(X, test_size=0.33, random_state=42)
         return x_train, x_test
 
     def _normalize(self, data):
