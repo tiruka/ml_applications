@@ -74,4 +74,5 @@ class PredictDAE(DAE, ImageStore):
         self.autoencoder.load_weights(os.path.join(settings.MODEL, f'{self.mode}_gae_model.h5'))
 
     def _load_img(self, path):
-        return img_to_array(load_img(path, target_size=(settings.SIZE)))
+        img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
+        return np.expand_dims(img_np, axis=0) / 255
