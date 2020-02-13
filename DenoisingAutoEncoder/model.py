@@ -11,17 +11,18 @@ from keras.models import (
     Sequential,
 )
 
+import settings
 
 class DAE(object):
     '''
     Convolutional AutoEncoder Model
     '''
 
-    def build_model(self, data=None):
-        if data is None:
+    def build_model(self, is_mnist=False):
+        if is_mnist:
             input_shape = (28, 28, 1)
         else:
-            input_shape = data.shape[1:]
+            input_shape = (*settings.SIZE, 1)
         autoencoder = Sequential()
         # Encoder Part
         autoencoder.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding='same', input_shape=input_shape))

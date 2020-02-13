@@ -38,7 +38,7 @@ class TrainDAE(DAE, ImageStore):
         (x_train, x_test), (noised_x_train, noised_x_test) = DataLoader().run(mode=self.mode, is_mnist=self.is_mnist)
         self._train(noised_x_train, x_train)
         noised_preds = self._predict(noised_x_test)
-        for i in range(10):
+        for i in range(5):
             np_img_list = [x_test[i], noised_x_test[i], noised_preds[i]]
             self.save(i, np_img_list)
 

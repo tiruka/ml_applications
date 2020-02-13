@@ -1,6 +1,7 @@
 import glob
 import os
 
+from PIL import Image
 import numpy as np
 from sklearn import model_selection
 from keras.datasets import mnist
@@ -25,9 +26,9 @@ class DataLoader(object):
         gaussian_x_train = self.make_gaussian_noise_data(x_train)
         gaussian_x_test = self.make_gaussian_noise_data(x_test)
         if debug:
-            array_to_img(x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'original.png'))
-            array_to_img(masked_x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'masked_noise.png'))
-            array_to_img(gaussian_x_train[0]).save(os.path.join(setting.DEBUG_IMG, 'gaussian_noise.png'))
+            array_to_img(x_train[0]).save(os.path.join(settings.DEBUG_IMG, 'original.png'))
+            array_to_img(masked_x_train[0]).save(os.path.join(settings.DEBUG_IMG, 'masked_noise.png'))
+            array_to_img(gaussian_x_train[0]).save(os.path.join(settings.DEBUG_IMG, 'gaussian_noise.png'))
         if mode == 'masked':
             return (x_train, x_test), (masked_x_train, masked_x_test)
         elif mode == 'gaussian':
@@ -42,8 +43,9 @@ class DataLoader(object):
         return x_train, x_test
 
     def load_data(self):
+        self._change_extensions()
         images = glob.glob(os.path.join(settings.DATA, '*.png'))
-        np_images = [img_to_array(load_img(path, target_size=(settings.SIZE))) for path in images]
+        np_images = np.array([img_to_array(load_img(path, target_size=(settings.SIZE))) for path in images])
         x_train, x_test = self._generate_cross_validation_data(np_images)
         x_train = x_train.reshape(-1, *settings.SIZE, 1)
         x_test = x_test.reshape(-1, *settings.SIZE, 1)
@@ -54,6 +56,20 @@ class DataLoader(object):
     def _generate_cross_validation_data(self, X):
         x_train, x_test = model_selection.train_test_split(X, test_size=0.33, random_state=42)
         return x_train, x_test
+
+    def _change_png(self, image):
+        img = Image.open(image)
+        img_resize = img.resize(settings.SIZE)
+        title, ext = os.path.splitext(image)
+        img_resize.save(title + 'resized' +'.png')
+        os.remove(image)
+
+    def _change_extensions(self):
+        extensions = ['jpg', 'jpeg', 'JPG', 'JPEG']
+        for ext in extensions:
+            other_images = glob.glob(os.path.join(settings.DATA, f'*.{ext}'))
+            for fp in other_images:
+                self._change_png(fp)
 
     def _normalize(self, data):
         return data / 255
@@ -73,5 +89,4 @@ class DataLoader(object):
         return gaussian_data
 
 if __name__ == "__main__":
-    loader = LoadMNISTData()
-    loader.run(debug=True)
+    DataLoader().run(mode='gaussian', debug=True)
