@@ -20,7 +20,7 @@ class Initializer:
 
 is_mnist = False
 if __name__ == "__main__":
-    if len(argv) < 1:
+    if len(argv) < 2:
         raise Exception('Please add args')
     args = frozenset(argv)
     if 'mnist' in args:
