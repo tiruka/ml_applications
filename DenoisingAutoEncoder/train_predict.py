@@ -1,7 +1,8 @@
 import os
 
+import numpy as np
 from PIL import Image
-from keras.preprocessing.image import array_to_img, load_img
+from keras.preprocessing.image import array_to_img, img_to_array, load_img
 from load_data import DataLoader
 from model import DAE
 
@@ -64,7 +65,7 @@ class PredictDAE(DAE, ImageStore):
     def predict(self, path):
         X = self._load_img(path)
         preds = self._predict(X)
-        for i in range(10):
+        for i in range(1):
             np_img_list = [X[i], preds[i]]
             self.save(i, np_img_list)
     

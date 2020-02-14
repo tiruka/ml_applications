@@ -1,7 +1,9 @@
-import os
 import glob
+import os
+from sys import argv
 
-from train_predict import TrainDAE
+
+from train_predict import TrainDAE, PredictDAE
 import settings
 
 class Initializer:
@@ -16,7 +18,20 @@ class Initializer:
             if os.path.isfile(t):
                 os.remove(t)
 
+is_mnist = False
 if __name__ == "__main__":
-    Initializer().cleanup()
-    # TrainDAE('masked', is_mnist=True).train()
-    TrainDAE('masked', is_mnist=False).train()
+    if len(argv) < 1:
+        raise Exception('Please add args')
+    args = frozenset(argv)
+    if 'mnist' in args:
+        is_mnist = True
+    if 'train' in args:
+        Initializer().cleanup()
+        if 'masked' in args:
+            TrainDAE('masked', is_mnist=is_mnist).train()
+        elif 'gaussian' in args:
+            TrainDAE('gaussian', is_mnist=is_mnist).train()
+        elif 'both' in args:
+            TrainDAE('both', is_mnist=is_mnist).train()
+    elif 'predict' in args:
+        PredictDAE().predict(argv[2])
