@@ -8,3 +8,4 @@ MODEL = os.path.join(VAR_DIR, 'model')
 DATA = os.path.join(BASE_DIR, 'data')
 
 SIZE = (300, 300)
+BATCH_SIZE = 30
