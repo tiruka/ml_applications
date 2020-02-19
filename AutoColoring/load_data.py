@@ -14,6 +14,7 @@ from keras.preprocessing.image import (
 )
 
 import settings
+from utils import rgb_to_lab, lab_to_rgb
 
 class DataLoader(object):
 
@@ -23,18 +24,19 @@ class DataLoader(object):
         self.test_n_sample = math.floor(len(self.data_list) * 0.1)
         self.train_n_sample = len(self.data_list) - self.val_n_sample - self.test_n_sample
         self.batch_size = settings.BATCH_SIZE
-
-    def run(self):
-        pass
+        self.train_list, self.val_list, self.test_list = self._generate_cross_validation_data(self.data_list)
 
     def load_data(self):
-        train_gen = self.generator_with_preprocessing(train_list, self.batch_size, shuffle=True)
-        val_gen = self.generator_with_preprocessing(val_list, self.batch_size)
-        test_gen = self.generator_with_preprocessing(test_list, self.batch_size)
+        train_gen = self.generator_with_preprocessing(self.train_list, self.batch_size, shuffle=True)
+        val_gen = self.generator_with_preprocessing(self.val_list, self.batch_size)
+        test_gen = self.generator_with_preprocessing(self.test_list, self.batch_size)
+        return train_gen, val_gen, test_gen
 
-        train_steps = self._cal_steps(train_list)
-        val_steps = self._cal_steps(val_list)
-        test_steps = self._cal_steps(test_list)
+    def cal_steps(self):
+        train_steps = self._cal_steps(self.train_list)
+        val_steps = self._cal_steps(self.val_list)
+        test_steps = self._cal_steps(self.test_list)
+        return train_steps, val_steps, test_steps
 
     def _generate_cross_validation_data(self, data_list):
         val_list = data_list[:self.val_n_sample]
@@ -62,17 +64,6 @@ class DataLoader(object):
             rgb = img_to_array(load_img(f, target_size=(img_size, img_size))).astype(np.uint8)
             x_lab.append(rgb_to_lab(rgb))
         return np.stack(x_lab)
-
-    @staticmethod
-    def rgb_to_lab(rgb):
-        assert rgb.type == 'uint8'
-        return cv2.cvtColor(rgb, cv2.COLOR_RGB2Lab)
-
-    @staticmethod
-    def lab_to_rgb(lab):
-        assert lab.type == 'uint8'
-        return cv2.cvtColor(lab, cv2.COLOR_Lab2RGB)
-
 
     def _change_png(self, image):
         img = Image.open(image)
