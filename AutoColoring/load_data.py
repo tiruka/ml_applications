@@ -18,32 +18,32 @@ import settings
 class DataLoader(object):
 
     def __init__(self):
-        data_list = glob.glob(os.path.join(settings.DATA, '*.jpg'))
-        val_n_sample = math.floor(len(data_list) * 0.1)
-        test_n_sample = math.floor(len(data_list) * 0.1)
-        train_n_sample = len(data_list) - val_n_sample - test_n_sample
-        batch_size = settings.BATCH_SIZE
+        self.data_list = glob.glob(os.path.join(settings.DATA, '*.jpg'))
+        self.val_n_sample = math.floor(len(self.data_list) * 0.1)
+        self.test_n_sample = math.floor(len(self.data_list) * 0.1)
+        self.train_n_sample = len(self.data_list) - self.val_n_sample - self.test_n_sample
+        self.batch_size = settings.BATCH_SIZE
 
-    def run(self, mode=None, debug=False, is_mnist=False):
+    def run(self):
         pass
 
     def load_data(self):
-        train_gen = self.generator_with_preprocessing(train_list, batch_size, shuffle=True)
-        val_gen = self.generator_with_preprocessing(val_list, batch_size)
-        test_gen = self.generator_with_preprocessing(test_list, batch_size)
+        train_gen = self.generator_with_preprocessing(train_list, self.batch_size, shuffle=True)
+        val_gen = self.generator_with_preprocessing(val_list, self.batch_size)
+        test_gen = self.generator_with_preprocessing(test_list, self.batch_size)
 
         train_steps = self._cal_steps(train_list)
         val_steps = self._cal_steps(val_list)
         test_steps = self._cal_steps(test_list)
 
     def _generate_cross_validation_data(self, data_list):
-        val_list = data_list[:val_n_sample]
-        test_list = data_list[val_n_sample:val_n_sample + test_n_sample]
-        train_list = data_list[val_n_sample + test_n_sample:val_n_sample + test_n_sample + train_n_sample]
+        val_list = data_list[:self.val_n_sample]
+        test_list = data_list[self.val_n_sample:self.val_n_sample + self.test_n_sample]
+        train_list = data_list[self.val_n_sample + self.test_n_sample:self.val_n_sample + self.test_n_sample + self.train_n_sample]
         return val_list, test_list, train_list
 
     def _cal_steps(self, data_list):
-        return math.ceil(len(data_list) / batch_size)
+        return math.ceil(len(data_list) / self.batch_size)
 
     def generator_with_preprocessing(self, data_list, batch_size, shuffle=False):
         while True:
