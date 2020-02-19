@@ -3,6 +3,7 @@ import math
 import os
 
 import cv2
+from PIL import Image, ImageOps
 from keras.preprocessing.image import (
     load_img,
     img_to_array,
@@ -75,3 +76,61 @@ def build_model():
     autoencoder.compile(optimizer='adam', loss='mse')
     autoencoder.summary()
     return autoencoder
+
+
+def generator_with_preprocessing(data_list, batch_size, shuffle=False):
+    while True:
+        if shuffle:
+            np.random.shuffle(data_list)
+        for i in range(0, len(data_list, batch_size)):
+            batch_list = data_list[i, i + batch_size]
+            batch_lab = get_lab_from_data_list(batch_list)
+            batch_l = batch_lab[:, :, :, 0:1]
+            batch_ab = batch_lab[:, :, :, 1:]
+            yield (batch_l, batch_ab)
+
+batch_size = 30
+train_gen = generator_with_preprocessing(train_lists, batch_size, shuffle=True)
+val_gen = generator_with_preprocessing(val_lists, batch_size)
+test_gen = generator_with_preprocessing(test_lists, batch_size)
+
+train_steps = math.ceil(len(train_lists) / batch_size)
+val_steps = math.ceil(len(val_lists) / batch_size)
+test_steps = math.ceil(len(test_lists) / batch_size)
+
+
+epochs = 10
+autoencoder = build_model()
+autoencoder.fit_generator(
+    generator=train_gen,
+    steps_per_epoch=train_steps,
+    epochs=epochs,
+    validation_data=val_gen,
+    validation_steps=val_steps,
+)
+autoencoder.save_weights('paht/to/auto_color_model.h5')
+
+preds = autoencoder.predict_generator(test_gen, steps=test_steps, verbose=0)
+x_test = []
+y_test = []
+for i, (l, ab) in enumerate(generator_with_preprocessing(test_lists, batch_size)):
+    x_test.append(l)
+    y_test.append(ab)
+    if i == test_steps - 1:
+        break
+
+x_test = np.vstack(x_test)
+y_test = np.vstack(y_test) 
+
+test_preds_lab = np.concatenate((x_test, preds), 3).astype(np.int8)
+
+test_preds_rgb = []
+for i in range(test_preds_lab.shape[0]):
+    preds_rgb = lab_to_rgb(test_preds_lab[i, :, :, :])
+    test_preds_rgb.append(preds_rgb)
+test_preds_rgb = np.stack(test_preds_rgb)
+
+
+
+for i in range(len(test_preds_rgb.shape[0])):
+    gray_image = ImageOps.grayscale(array_to_img(test_preds_rgb[i]))
