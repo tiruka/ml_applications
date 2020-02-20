@@ -71,8 +71,18 @@ class TrainAutoColor(AutoColorEncoder, ImageStore):
             test_preds_rgb.append(preds_rgb)
         test_preds_rgb = np.stack(test_preds_rgb)
 
+        original_lab = np.concatenate((x_test, y_test), 3).astype(np.int8)
+        original_rgb = []
+        for i in range(original_lab.shape[0]):
+            original_rgb.append(lab_to_rgb(original_lab[i, :, :, :]))
+        original_rgb = np.stack(original_rgb)
+
         for i in range(len(test_preds_rgb.shape[0])):
-            gray_image = ImageOps.grayscale(array_to_img(test_preds_rgb[i]))
+            gray_image = img_to_array(ImageOps.grayscale(array_to_img(test_preds_rgb[i])))
+            auto_colored_image = test_preds_rgb[i]
+            original_image = original_rgb[i]
+            np_img_list = [gray_image, auto_colored_image, original_image]
+            save(i, np_img_list)
 
 
 class PredictAutoColor(AutoColorEncoder, ImageStore):

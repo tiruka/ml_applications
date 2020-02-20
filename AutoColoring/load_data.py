@@ -79,8 +79,3 @@ class DataLoader(object):
             for fp in other_images:
                 self._change_png(fp)
 
-    def _normalize(self, data):
-        return data / 255
-
-if __name__ == "__main__":
-    DataLoader().run(mode='gaussian', debug=True)
