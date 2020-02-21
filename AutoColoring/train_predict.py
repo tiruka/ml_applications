@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from keras.preprocessing.image import array_to_img, img_to_array, load_img
 from load_data import DataLoader
 from model import AutoColorEncoder
@@ -31,10 +31,10 @@ class ImageStore:
 
 class TrainAutoColor(AutoColorEncoder, ImageStore):
 
-    def __init__(self):
+    def __init__(self, epochs=100):
         self.autoencoder = self.build_model()
         self.loader = DataLoader()
-        self.epochs = 10
+        self.epochs = epochs
 
     def train(self):
         train_gen, val_gen, test_gen = self.loader.load_data()
@@ -64,25 +64,25 @@ class TrainAutoColor(AutoColorEncoder, ImageStore):
         x_test = np.vstack(x_test)
         y_test = np.vstack(y_test) 
 
-        test_preds_lab = np.concatenate((x_test, preds), 3).astype(np.int8)
+        test_preds_lab = np.concatenate((x_test, preds), 3).astype(np.uint8)
         test_preds_rgb = []
         for i in range(test_preds_lab.shape[0]):
             preds_rgb = lab_to_rgb(test_preds_lab[i, :, :, :])
             test_preds_rgb.append(preds_rgb)
         test_preds_rgb = np.stack(test_preds_rgb)
 
-        original_lab = np.concatenate((x_test, y_test), 3).astype(np.int8)
+        original_lab = np.concatenate((x_test, y_test), 3).astype(np.uint8)
         original_rgb = []
         for i in range(original_lab.shape[0]):
             original_rgb.append(lab_to_rgb(original_lab[i, :, :, :]))
         original_rgb = np.stack(original_rgb)
 
-        for i in range(len(test_preds_rgb.shape[0])):
+        for i in range(test_preds_rgb.shape[0]):
             gray_image = img_to_array(ImageOps.grayscale(array_to_img(test_preds_rgb[i])))
             auto_colored_image = test_preds_rgb[i]
             original_image = original_rgb[i]
             np_img_list = [gray_image, auto_colored_image, original_image]
-            save(i, np_img_list)
+            self.save(i, np_img_list)
 
 
 class PredictAutoColor(AutoColorEncoder, ImageStore):
@@ -104,5 +104,5 @@ class PredictAutoColor(AutoColorEncoder, ImageStore):
         self.autoencoder.load_weights(os.path.join(settings.MODEL, f'{self.mode}_gae_model.h5'))
 
     def _load_img(self, path):
-        img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
+        img_np = img_to_array(load_img(path, target_size=settings.SIZE))
         return np.expand_dims(img_np, axis=0) / 255

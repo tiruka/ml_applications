@@ -51,8 +51,8 @@ class DataLoader(object):
         while True:
             if shuffle:
                 np.random.shuffle(data_list)
-            for i in range(0, len(data_list, batch_size)):
-                batch_list = data_list[i, i + batch_size]
+            for i in range(0, len(data_list), batch_size):
+                batch_list = data_list[i:i + batch_size]
                 batch_lab = self.get_lab_from_data_list(batch_list)
                 batch_l = batch_lab[:, :, :, 0:1]
                 batch_ab = batch_lab[:, :, :, 1:]
@@ -61,7 +61,7 @@ class DataLoader(object):
     def get_lab_from_data_list(self, data_list):
         x_lab = []
         for f in data_list:
-            rgb = img_to_array(load_img(f, target_size=(img_size, img_size))).astype(np.uint8)
+            rgb = img_to_array(load_img(f, target_size=settings.SIZE)).astype(np.uint8)
             x_lab.append(rgb_to_lab(rgb))
         return np.stack(x_lab)
 
