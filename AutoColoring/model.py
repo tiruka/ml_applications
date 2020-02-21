@@ -1,10 +1,6 @@
 from keras.layers import (
     Conv2D,
-    Dense,
-    Input,
-    MaxPool2D,
-    UpSampling2D,
-    Lambda,
+    Conv2DTranspose,
 )
 from keras.models import (
     Model,
@@ -21,15 +17,15 @@ class AutoColorEncoder(object):
     def build_model(self):
         autoencoder = Sequential()
         # Encoder Part
-        autoencoder.add(Conv2D(32, (3, 3), (1, 1), activation='relu', padding='same', input_shape=(img_size, img_size, 1)))
-        autoencoder.add(Conv2D(64, (3, 3), (2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2D(128, (3, 3), (2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2D(256, (3, 3), (2, 2), activation='relu', padding='same'))
+        autoencoder.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding='same', input_shape=(*settings.SIZE, 1)))
+        autoencoder.add(Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        autoencoder.add(Conv2D(filters=128, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        autoencoder.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
         # Decoder Part
-        autoencoder.add(Conv2DTranspose(128, (3, 3), (2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2DTranspose(64, (3, 3), (2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2DTranspose(32, (3, 3), (2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2DTranspose(2, (1, 1), (1, 1), activation='relu', padding='same'))
+        autoencoder.add(Conv2DTranspose(filters=128, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        autoencoder.add(Conv2DTranspose(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        autoencoder.add(Conv2DTranspose(filters=32, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
+        autoencoder.add(Conv2DTranspose(filters=2, kernel_size=(1, 1), strides=(1, 1), activation='relu', padding='same'))
 
         autoencoder.compile(optimizer='adam', loss='mse')
         autoencoder.summary()
