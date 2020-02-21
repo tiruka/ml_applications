@@ -7,4 +7,4 @@ COMPARABLE_IMG = os.path.join(VAR_DIR, 'comparable_img')
 MODEL = os.path.join(VAR_DIR, 'model')
 DATA = os.path.join(BASE_DIR, 'data')
 
-SIZE = (300, 300)
+SIZE = (224, 224)
