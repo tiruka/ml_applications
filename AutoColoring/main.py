@@ -2,7 +2,7 @@ import glob
 import os
 from sys import argv
 
-from train_predict import TrainAutoColor
+from train_predict import TrainAutoColor, PredictAutoColor
 import settings
 
 
@@ -26,4 +26,4 @@ if __name__ == "__main__":
         Initializer().cleanup()
         TrainAutoColor().train()
     elif 'predict' in args:
-        pass
+        PredictAutoColor().predict(argv[2])

@@ -78,4 +78,3 @@ class DataLoader(object):
             other_images = glob.glob(os.path.join(settings.DATA, f'*.{ext}'))
             for fp in other_images:
                 self._change_png(fp)
-

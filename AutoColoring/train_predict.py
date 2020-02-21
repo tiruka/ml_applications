@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import numpy as np
 from PIL import Image, ImageOps
@@ -7,14 +8,14 @@ from load_data import DataLoader
 from model import AutoColorEncoder
 
 import settings
-from utils import lab_to_rgb
+from utils import lab_to_rgb, rgb_to_lab
 
 
 class ImageStore:
 
     def save(self, num, np_img_list):
         comparable_img = self._get_concat_horizontal_multi_resize(np_img_list)
-        comparable_img.save(os.path.join(settings.COMPARABLE_IMG, f'{num}_original.png'))
+        comparable_img.save(os.path.join(settings.COMPARABLE_IMG, f'{num}_comparable.png'))
 
     def _get_concat_horizontal_multi_resize(self, np_img_list, resample=Image.BICUBIC):
         im_list = [array_to_img(x) for x in np_img_list]
@@ -91,18 +92,15 @@ class PredictAutoColor(AutoColorEncoder, ImageStore):
         self.autoencoder = self.build_model()
 
     def predict(self, path):
-        X = self._load_img(path)
-        preds = self._predict(X)
-        for i in range(1):
-            np_img_list = [X[i], preds[i]]
-            self.save(i, np_img_list)
-    
-    def _predict(self, X):
-        return self.autoencoder.predict_generator(test_gen, steps=test_steps, verbose=0)
+        rgb = img_to_array(load_img(path, target_size=settings.SIZE)).astype(np.uint8)
+        x_lab = [rgb_to_lab(rgb)]
+        lab = np.stack(x_lab)
+        l = lab[:, :, :, 0:1]
+        preds = self.autoencoder.predict(l, verbose=0)
+        preds_lab = np.concatenate((l, preds), 3).astype(np.uint8)
+        preds_rgp = lab_to_rgb(preds_lab[0, :, :, :])
 
-    def _load_model(self):
-        self.autoencoder.load_weights(os.path.join(settings.MODEL, f'{self.mode}_gae_model.h5'))
-
-    def _load_img(self, path):
-        img_np = img_to_array(load_img(path, target_size=settings.SIZE))
-        return np.expand_dims(img_np, axis=0) / 255
+        gray_image = img_to_array(ImageOps.grayscale(array_to_img(rgb)))
+        auto_colored_image = preds_rgp
+        np_img_list = [gray_image, auto_colored_image, rgb]
+        self.save(datetime.now().strftime('%Y%m%d%H%M%S'), np_img_list)
