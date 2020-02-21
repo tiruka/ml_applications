@@ -92,10 +92,10 @@ class PredictAutoColor(AutoColorEncoder, ImageStore):
         self.autoencoder = self.build_model()
 
     def predict(self, path):
-        rgb = img_to_array(load_img(path, target_size=settings.SIZE)).astype(np.uint8)
-        x_lab = [rgb_to_lab(rgb)]
-        lab = np.stack(x_lab)
-        l = lab[:, :, :, 0:1]
+        rgb = img_to_array(load_img(path, target_size=settings.SIZE)).astype(np.uint8) # shape (224, 224, 3)
+        x_lab = [rgb_to_lab(rgb)] 
+        lab = np.stack(x_lab) # shape (1, 224, 224, 3)
+        l = lab[:, :, :, 0:1] # shape (1, 224, 224, 1)
         preds = self.autoencoder.predict(l, verbose=0)
         preds_lab = np.concatenate((l, preds), 3).astype(np.uint8)
         preds_rgp = lab_to_rgb(preds_lab[0, :, :, :])
