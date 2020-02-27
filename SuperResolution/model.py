@@ -1,7 +1,6 @@
-from keras.layers import (
-    Conv2D,
-    Conv2DTranspose,
-)
+import numpy as np
+from keras.layers import Conv2D
+from keras import backend as K
 from keras.models import (
     Model,
     Sequential,
@@ -9,24 +8,24 @@ from keras.models import (
 
 import settings
 
-class AutoColorEncoder(object):
+class SuperResolution(object):
     '''
-    Convolutional AutoEncoder Model
+    SuperResolution CNN Model
     '''
 
     def build_model(self):
-        autoencoder = Sequential()
-        # Encoder Part
-        autoencoder.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), activation='relu', padding='same', input_shape=(*settings.SIZE, 1)))
-        autoencoder.add(Conv2D(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2D(filters=128, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2D(filters=256, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        # Decoder Part
-        autoencoder.add(Conv2DTranspose(filters=128, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2DTranspose(filters=64, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2DTranspose(filters=32, kernel_size=(3, 3), strides=(2, 2), activation='relu', padding='same'))
-        autoencoder.add(Conv2DTranspose(filters=2, kernel_size=(1, 1), strides=(1, 1), activation='relu', padding='same'))
+        model = Sequential()
+        model.add(Conv2D(filters=64, kernel_size=9, activation='relu', padding='same', input_shape=(None, None, 3)))
+        model.add(Conv2D(filters=32, kernel_size=1, activation='relu', padding='same')
+        model.add(Conv2D(filters=3, kernel_size=5, activation='relu', padding='same')
+        model.compile(optimizer='adam', loss=[self.psnr])
+        model.summary()
+        return model
 
-        autoencoder.compile(optimizer='adam', loss='mse')
-        autoencoder.summary()
-        return autoencoder
+    def psnr(self, y_true, y_pred):
+        # Estimation Funciton: Peak Signal-to-Noise Ratio
+        # The bigger PSNR is, the better.
+        # Roughly the range of PSNR is from 20dB to 50dB
+        return -10 * K.log(
+            K.mean(K.flatten((y_true - y_pred) ** 2))
+            ) / np.log(10)
