@@ -29,7 +29,7 @@ class DataLoader(object):
 
     def set_iters(self):
         self.img_train_iters = self._create_img_iters(settings.DATA, 'train')
-        self.img_validation_iters = self._create_img_iters(settings.VAL_DATA, 'test', shuffle=False)
+        self.img_validation_iters = self._create_img_iters(settings.DATA, 'val', shuffle=False)
 
     def pre_calculation(self):
         self.steps_per_epoch = self.cal_steps_for_epoch(self.img_train_iters)
@@ -44,7 +44,7 @@ class DataLoader(object):
         small_size = (int(x.shape[0] / scale), int(x.shape[1] / scale))
         img = array_to_img(x)
         small_img = img.resize(small_size)
-        return img_to_array(small_img.rezie(img.size, 3))
+        return img_to_array(small_img.resize(img.size, 3))
 
     def _create_img_iters(self, data_dir, mode, shuffle=True):
         return ImageDataGenerator().flow_from_directory(

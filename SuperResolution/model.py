@@ -19,7 +19,7 @@ class SuperResolution(object):
         model.add(Conv2D(filters=32, kernel_size=1, activation='relu', padding='same'))
         model.add(Conv2D(filters=3, kernel_size=5, activation='relu', padding='same'))
         model.compile(optimizer='adam', loss=[self.psnr])
-        model.summary()
+        # model.summary()
         return model
 
     def psnr(self, y_true, y_pred):
