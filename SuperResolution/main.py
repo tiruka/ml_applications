@@ -26,4 +26,4 @@ if __name__ == "__main__":
         # Initializer().cleanup()
         TrainSuperResolution().train()
     elif 'predict' in args:
-        PredictAutoColor().predict(argv[2])
+        PredictSuperResolution().predict(argv[2])

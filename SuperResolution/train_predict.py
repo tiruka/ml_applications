@@ -58,15 +58,18 @@ class PredictSuperResolution(SuperResolution, ImageStore):
         self.model = self.build_model()
 
     def predict(self, path):
-        rgb = img_to_array(load_img(path, target_size=settings.SIZE)).astype(np.uint8) # shape (224, 224, 3)
-        x_lab = [rgb_to_lab(rgb)] 
-        lab = np.stack(x_lab) # shape (1, 224, 224, 3)
-        l = lab[:, :, :, 0:1] # shape (1, 224, 224, 1)
-        preds = self.model.predict(l, verbose=0)
-        preds_lab = np.concatenate((l, preds), 3).astype(np.uint8)
-        preds_rgp = lab_to_rgb(preds_lab[0, :, :, :])
+        X = self._load_img(path)
+        preds = self._predict(X)
+        for i in range(1):
+            np_img_list = [X[i], preds[i]]
+            self.save(i, np_img_list)
+    
+    def _predict(self, X):
+        return self.model.predict(X)
 
-        gray_image = img_to_array(ImageOps.grayscale(array_to_img(rgb)))
-        auto_colored_image = preds_rgp
-        np_img_list = [gray_image, auto_colored_image, rgb]
-        self.save(datetime.now().strftime('%Y%m%d%H%M%S'), np_img_list)
+    def _load_model(self):
+        self.model.load_weights(os.path.join(settings.MODEL, 'super_resolution_model.h5'))
+
+    def _load_img(self, path):
+        img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
+        return np.expand_dims(img_np, axis=0) / 255
