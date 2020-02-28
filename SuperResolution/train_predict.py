@@ -8,7 +8,6 @@ from load_data import DataLoader
 from model import SuperResolution
 
 import settings
-from utils import lab_to_rgb, rgb_to_lab
 
 
 class ImageStore:
@@ -32,7 +31,7 @@ class ImageStore:
 
 class TrainSuperResolution(SuperResolution, ImageStore):
 
-    def __init__(self, epochs=50):
+    def __init__(self, epochs=10):
         self.model = self.build_model()
         self.loader = DataLoader()
         self.epochs = epochs
@@ -50,19 +49,11 @@ class TrainSuperResolution(SuperResolution, ImageStore):
             validation_data=val_gen,
             validation_steps=val_steps,
         )
-        self.model.save_weights(os.path.join(settings.MODEL, 'auto_color_model.h5'))
-
-    def _train(self, train_gen, train_steps, val_gen, val_steps):
-        self.model.fit_generator(
-            generator=train_gen,
-            validation_data=(text_x, test_y),
-            steps_per_epochs=N_TRAIN_DATA // settings.BATCH_SIZE,
-            epochs=self.epochs,
-        )
         self.model.save_weights(os.path.join(settings.MODEL, 'super_resolution_model.h5'))
 
-class PredictAutoColor(AutoColorEncoder, ImageStore):
-    
+
+class PredictSuperResolution(SuperResolution, ImageStore):
+
     def __init__(self):
         self.model = self.build_model()
 

@@ -2,7 +2,7 @@ import glob
 import os
 from sys import argv
 
-from train_predict import TrainAutoColor, PredictAutoColor
+from train_predict import TrainSuperResolution, PredictSuperResolution
 import settings
 
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         raise Exception('Please add args')
     args = frozenset(argv)
     if 'train' in args:
-        Initializer().cleanup()
-        TrainAutoColor().train()
+        # Initializer().cleanup()
+        TrainSuperResolution().train()
     elif 'predict' in args:
         PredictAutoColor().predict(argv[2])

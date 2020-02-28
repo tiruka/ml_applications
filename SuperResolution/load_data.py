@@ -18,15 +18,18 @@ import settings
 class DataLoader(object):
 
     def __init__(self):
+        self.batch_size = settings.BATCH_SIZE
         self.img_train_iters = self.img_validation_iters = None
-        self.set_generator()
 
     def load_data(self):
-        return self.img_train_iters, self.img_validation_iters
+        self.set_iters()
+        train_gen = self.data_generator(self.img_train_iters)
+        val_gen = self.data_generator(self.img_validation_iters)
+        return train_gen, val_gen
 
-    def set_generator(self):
-        self.img_train_iters = self.data_generator(settings.DATA, 'train', batch_size=settings.BATCH_SIZE)
-        self.img_validation_iters = self.data_generator(settings.VAL_DATA, 'test', batch_size=settings.BATCH_SIZE)
+    def set_iters(self):
+        self.img_train_iters = self._create_img_iters(settings.DATA, 'train')
+        self.img_validation_iters = self._create_img_iters(settings.VAL_DATA, 'test', shuffle=False)
 
     def pre_calculation(self):
         self.steps_per_epoch = self.cal_steps_for_epoch(self.img_train_iters)
@@ -43,8 +46,8 @@ class DataLoader(object):
         small_img = img.resize(small_size)
         return img_to_array(small_img.rezie(img.size, 3))
 
-    def data_generator(self, data_dir, mode, scale=2.0, shuffle=True):
-        for images in ImageDataGenerator().flow_from_directory(
+    def _create_img_iters(self, data_dir, mode, shuffle=True):
+        return ImageDataGenerator().flow_from_directory(
             directory=data_dir,
             classes=[mode],
             class_mode=None,
@@ -52,6 +55,9 @@ class DataLoader(object):
             target_size=settings.SIZE,
             batch_size=self.batch_size,
             shuffle=shuffle
-        ):
+        )
+
+    def data_generator(self, iters, scale=2.0, shuffle=True):
+        for images in iters:
             x = np.array([self.drop_resolution(img, scale) for img in images])
             yield x / 255., images / 255.
