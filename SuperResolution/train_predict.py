@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image, ImageOps
 from keras.preprocessing.image import array_to_img, img_to_array, load_img
 from load_data import DataLoader
-from model import SuperResolution
+from model import SuperResolution, SuperResolutionWithSkipConnections
 
 import settings
 
@@ -29,12 +29,13 @@ class ImageStore:
             pos_x += im.width
         return dst
 
-class TrainSuperResolution(SuperResolution, ImageStore):
+class TrainSuperResolution(SuperResolution):
 
     def __init__(self, epochs=10):
         self.model = self.build_model()
         self.loader = DataLoader()
         self.epochs = epochs
+        self.model_name = 'super_resolution_model'
 
     def train(self):
         train_gen, val_gen = self.loader.load_data()
@@ -49,7 +50,13 @@ class TrainSuperResolution(SuperResolution, ImageStore):
             validation_data=val_gen,
             validation_steps=val_steps,
         )
-        self.model.save_weights(os.path.join(settings.MODEL, 'super_resolution_model.h5'))
+        self.model.save_weights(os.path.join(settings.MODEL, f'{self.model_name}.h5'))
+
+
+class TrainHyperResolution(SuperResolutionWithSkipConnections, TrainSuperResolution):
+    def __init__(self):
+        super().__init__()
+        self.model_name = 'hyper_resolution_model'
 
 
 class PredictSuperResolution(SuperResolution, ImageStore):
@@ -73,3 +80,7 @@ class PredictSuperResolution(SuperResolution, ImageStore):
     def _load_img(self, path):
         img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
         return np.expand_dims(img_np, axis=0) / 255
+
+
+class PredictHyperResolution(SuperResolutionWithSkipConnections, PredictSuperResolution):
+    pass

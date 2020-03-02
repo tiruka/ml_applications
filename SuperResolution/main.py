@@ -2,7 +2,10 @@ import glob
 import os
 from sys import argv
 
-from train_predict import TrainSuperResolution, PredictSuperResolution
+from train_predict import (
+    TrainSuperResolution,
+    PredictSuperResolution,
+    
 import settings
 
 
@@ -24,6 +27,8 @@ if __name__ == "__main__":
     args = frozenset(argv)
     if 'train' in args:
         # Initializer().cleanup()
+        TrainSuperResolution().train()
+    elif 'hyper' in args:
         TrainSuperResolution().train()
     elif 'predict' in args:
         PredictSuperResolution().predict(argv[2])
