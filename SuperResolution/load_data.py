@@ -2,10 +2,8 @@ import glob
 import math
 import os
 
-from PIL import Image
 import numpy as np
 from sklearn import model_selection
-from keras.datasets import mnist
 from keras.preprocessing.image import (
     load_img,
     img_to_array,
@@ -14,6 +12,7 @@ from keras.preprocessing.image import (
 )
 
 import settings
+from utils import drop_resolution
 
 class DataLoader(object):
 
@@ -39,13 +38,6 @@ class DataLoader(object):
     def cal_steps_for_epoch(self, iters):
         return math.ceil(iters.samples / self.batch_size)
 
-    def drop_resolution(self, x, scale=3.0):
-        # resize to small and resize to original in order to drop resolution easily.
-        small_size = (int(x.shape[0] / scale), int(x.shape[1] / scale))
-        img = array_to_img(x)
-        small_img = img.resize(small_size)
-        return img_to_array(small_img.resize(img.size, 3))
-
     def _create_img_iters(self, data_dir, mode, shuffle=True):
         return ImageDataGenerator().flow_from_directory(
             directory=data_dir,
@@ -59,5 +51,5 @@ class DataLoader(object):
 
     def data_generator(self, iters, scale=2.0, shuffle=True):
         for images in iters:
-            x = np.array([self.drop_resolution(img, scale) for img in images])
+            x = np.array([drop_resolution(img, scale) for img in images])
             yield x / 255., images / 255.

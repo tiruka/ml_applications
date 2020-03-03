@@ -5,7 +5,9 @@ from sys import argv
 from train_predict import (
     TrainSuperResolution,
     PredictSuperResolution,
-    
+    TrainHyperResolution,
+    PredictHyperResolution,
+)
 import settings
 
 
@@ -25,10 +27,12 @@ if __name__ == "__main__":
     if len(argv) < 2:
         raise Exception('Please add args')
     args = frozenset(argv)
-    if 'train' in args:
+    if 'train_super' in args:
         # Initializer().cleanup()
-        TrainSuperResolution().train()
-    elif 'hyper' in args:
-        TrainSuperResolution().train()
-    elif 'predict' in args:
+        TrainSuperResolution(epochs=50).train()
+    elif 'train_hyper' in args:
+        TrainHyperResolution(epochs=50).train()
+    elif 'predict_super' in args:
         PredictSuperResolution().predict(argv[2])
+    elif 'predict_hyper' in args:
+        PredictHyperResolution().predict(argv[2])

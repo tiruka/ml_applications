@@ -8,7 +8,7 @@ from load_data import DataLoader
 from model import SuperResolution, SuperResolutionWithSkipConnections
 
 import settings
-
+from utils import drop_resolution
 
 class ImageStore:
 
@@ -66,10 +66,12 @@ class PredictSuperResolution(SuperResolution, ImageStore):
         self.model_name = 'super_resolution_model'
 
     def predict(self, path):
-        X = self._load_img(path)
+        original = self._load_img(path)
+        X = drop_resolution(original[0]) / 255.
+        X = np.expand_dims(X, axis=0)
         preds = self._predict(X)
         for i in range(1):
-            np_img_list = [X[i], preds[i]]
+            np_img_list = [original[i], X[i], preds[i]]
             self.save(i, np_img_list)
     
     def _predict(self, X):
