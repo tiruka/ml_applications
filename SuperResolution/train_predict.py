@@ -67,7 +67,7 @@ class PredictSuperResolution(SuperResolution, ImageStore):
 
     def predict(self, path):
         original = self._load_img(path)
-        X = drop_resolution(original[0]) / 255.
+        X = drop_resolution(original[0])
         X = np.expand_dims(X, axis=0)
         preds = self._predict(X)
         for i in range(1):
@@ -82,7 +82,7 @@ class PredictSuperResolution(SuperResolution, ImageStore):
 
     def _load_img(self, path):
         img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
-        return np.expand_dims(img_np, axis=0) / 255
+        return np.expand_dims(img_np, axis=0) / 255.
 
 
 class PredictHyperResolution(PredictSuperResolution, SuperResolutionWithSkipConnections):

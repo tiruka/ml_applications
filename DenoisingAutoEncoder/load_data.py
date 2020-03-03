@@ -70,7 +70,7 @@ class DataLoader(object):
                 self._change_png(fp)
 
     def _normalize(self, data):
-        return data / 255
+        return data / 255.
 
     def make_masking_noise_data(self, data, percentage=0.1):
         '''Masking data by partially changing to 0 randomly'''

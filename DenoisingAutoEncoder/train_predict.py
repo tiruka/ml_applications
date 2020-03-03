@@ -77,4 +77,4 @@ class PredictDAE(DAE, ImageStore):
 
     def _load_img(self, path):
         img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
-        return np.expand_dims(img_np, axis=0) / 255
+        return np.expand_dims(img_np, axis=0) / 255.
