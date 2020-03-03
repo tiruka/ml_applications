@@ -17,8 +17,8 @@ class SuperResolution(object):
         model = Sequential()
         model.add(Conv2D(filters=64, kernel_size=9, activation='relu', padding='same', input_shape=(None, None, 3)))
         model.add(Conv2D(filters=32, kernel_size=1, activation='relu', padding='same'))
-        model.add(Conv2D(filters=3, kernel_size=5, activation='relu', padding='same'))
-        model.compile(optimizer='adam', loss=[self.psnr])
+        model.add(Conv2D(filters=3, kernel_size=5, padding='same'))
+        model.compile(optimizer='adam', loss='mean_squared_error', metrics=[self.psnr])
         # model.summary()
         return model
 
@@ -27,7 +27,7 @@ class SuperResolution(object):
         # The bigger PSNR is, the better.
         # Roughly the range of PSNR is from 20dB to 50dB
         return -10 * K.log(
-            K.mean(K.flatten((y_true - y_pred) ** 2))
+            K.mean(K.flatten((y_true - y_pred)) ** 2)
             ) / np.log(10)
 
 
@@ -55,6 +55,6 @@ class SuperResolutionWithSkipConnections(SuperResolution):
         deconv1 = Conv2DTranspose(filters=3, kernel_size=3, padding='same')(deconv1)
         outputs = Add()([deconv1, inputs])
         model = Model(inputs, outputs)
-        model.compile(optimizer='adam', loss=[self.psnr])
+        model.compile(optimizer='adam', loss='mean_squared_error', metrics=[self.psnr])
         # model.summary()
         return model
