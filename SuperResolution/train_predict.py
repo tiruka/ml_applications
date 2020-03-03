@@ -53,9 +53,9 @@ class TrainSuperResolution(SuperResolution):
         self.model.save_weights(os.path.join(settings.MODEL, f'{self.model_name}.h5'))
 
 
-class TrainHyperResolution(SuperResolutionWithSkipConnections, TrainSuperResolution):
-    def __init__(self):
-        super().__init__()
+class TrainHyperResolution(TrainSuperResolution, SuperResolutionWithSkipConnections):
+    def __init__(self, epochs=10):
+        super().__init__(epochs)
         self.model_name = 'hyper_resolution_model'
 
 
@@ -63,6 +63,7 @@ class PredictSuperResolution(SuperResolution, ImageStore):
 
     def __init__(self):
         self.model = self.build_model()
+        self.model_name = 'super_resolution_model'
 
     def predict(self, path):
         X = self._load_img(path)
@@ -75,12 +76,15 @@ class PredictSuperResolution(SuperResolution, ImageStore):
         return self.model.predict(X)
 
     def _load_model(self):
-        self.model.load_weights(os.path.join(settings.MODEL, 'super_resolution_model.h5'))
+        self.model.load_weights(os.path.join(settings.MODEL, f'{self.model_name}.h5'))
 
     def _load_img(self, path):
         img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
         return np.expand_dims(img_np, axis=0) / 255
 
 
-class PredictHyperResolution(SuperResolutionWithSkipConnections, PredictSuperResolution):
-    pass
+class PredictHyperResolution(PredictSuperResolution, SuperResolutionWithSkipConnections):
+
+        def __init__(self):
+            super().__init__()
+            self.model_name = 'hyper_resolution_model'
