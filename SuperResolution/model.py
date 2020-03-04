@@ -15,8 +15,8 @@ class SuperResolution(object):
 
     def build_model(self):
         model = Sequential()
-        model.add(Conv2D(filters=64, kernel_size=9, activation='relu', padding='same', input_shape=(None, None, 3)))
-        model.add(Conv2D(filters=32, kernel_size=1, activation='relu', padding='same'))
+        model.add(Conv2D(filters=64, kernel_size=9, padding='same', activation='relu', input_shape=(None, None, 3)))
+        model.add(Conv2D(filters=32, kernel_size=1, padding='same', activation='relu'))
         model.add(Conv2D(filters=3, kernel_size=5, padding='same'))
         model.compile(optimizer='adam', loss='mean_squared_error', metrics=[self.psnr])
         # model.summary()
