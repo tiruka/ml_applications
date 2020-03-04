@@ -14,10 +14,12 @@ class ImageStore:
 
     def save(self, num, np_img_list):
         comparable_img = self._get_concat_horizontal_multi_resize(np_img_list)
-        comparable_img.save(os.path.join(settings.COMPARABLE_IMG, f'{num}_comparable.png'))
+        comparable_img.save(os.path.join(settings.COMPARABLE_IMG, f'{num}_comparable.jpg'))
 
     def _get_concat_horizontal_multi_resize(self, np_img_list, resample=Image.BICUBIC):
         im_list = [array_to_img(x) for x in np_img_list]
+        # for i, im in enumerate(im_list):
+        #     print(i, im.format, im.size, im.mode, im.getextrema())
         min_height = min(im.height for im in im_list)
         im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
                         for im in im_list]
@@ -73,7 +75,17 @@ class PredictSuperResolution(SuperResolution, ImageStore):
         for i in range(1):
             np_img_list = [original[i], X[i], preds[i]]
             self.save(i, np_img_list)
-    
+
+    def val_predict(self):
+        loader = DataLoader()
+        _, val_gen = loader.load_data()
+        for i, (val_x, val_y) in enumerate(val_gen):
+            preds = self._predict(val_x)
+            np_img_list = [val_y[0], val_x[0], preds[0]]
+            self.save(i, np_img_list)
+            if i >= 3:
+                break
+
     def _predict(self, X):
         return self.model.predict(X)
 

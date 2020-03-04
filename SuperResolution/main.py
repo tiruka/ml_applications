@@ -15,7 +15,8 @@ class Initializer:
     
     def cleanup(self):
         self._clean_files('png')
-        self._clean_files('h5')
+        self._clean_files('jpg')
+        # self._clean_files('h5')
 
     def _clean_files(self, mode='png'):
         targets = glob.glob(os.path.join(settings.VAR_DIR, '**', f'*.{mode}'), recursive=True)
@@ -26,9 +27,9 @@ class Initializer:
 if __name__ == "__main__":
     if len(argv) < 2:
         raise Exception('Please add args')
+    Initializer().cleanup()
     args = frozenset(argv)
     if 'train_super' in args:
-        # Initializer().cleanup()
         TrainSuperResolution(epochs=50).train()
     elif 'train_hyper' in args:
         TrainHyperResolution(epochs=50).train()
@@ -36,3 +37,5 @@ if __name__ == "__main__":
         PredictSuperResolution().predict(argv[2])
     elif 'predict_hyper' in args:
         PredictHyperResolution().predict(argv[2])
+    elif 'test' in args:
+        PredictSuperResolution().val_predict()
