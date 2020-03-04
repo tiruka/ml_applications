@@ -39,3 +39,7 @@ if __name__ == "__main__":
         PredictHyperResolution().predict(argv[2])
     elif 'test' in args:
         PredictSuperResolution().val_predict()
+    elif 'enhance_super' in args:
+        PredictSuperResolution().enhance(argv[2])
+    elif 'enhance_hyper' in args:
+        PredictHyperResolution().enhance(argv[2])

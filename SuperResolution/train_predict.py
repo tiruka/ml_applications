@@ -69,12 +69,26 @@ class PredictSuperResolution(SuperResolution, ImageStore):
         self._load_model()
 
     def predict(self, path):
+        '''
+        Return original image, low-resolution image, and
+        predicted image which will be high-resolution from low-resolution image
+        '''
         original = self._load_img(path)
         X = drop_resolution(original[0])
         X = np.expand_dims(X, axis=0)
         preds = self._predict(X)
         for i in range(1):
             np_img_list = [original[i], X[i], preds[i]]
+            self.save(i, np_img_list)
+
+    def enhance(self, path):
+        '''
+        Return original image and predicted image which will be high-resolution from original image
+        '''
+        original = self._load_img(path)
+        preds = self._predict(original)
+        for i in range(1):
+            np_img_list = [original[i], preds[i]]
             self.save(i, np_img_list)
 
     def val_predict(self):
@@ -101,5 +115,6 @@ class PredictSuperResolution(SuperResolution, ImageStore):
 class PredictHyperResolution(PredictSuperResolution, SuperResolutionWithSkipConnections):
 
         def __init__(self):
-            super().__init__()
+            self.model = self.build_model()
             self.model_name = 'hyper_resolution_model'
+            self._load_model()
