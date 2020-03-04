@@ -32,7 +32,7 @@ class DataLoader(object):
 
     def pre_calculation(self):
         self.steps_per_epoch = self.cal_steps_for_epoch(self.img_train_iters)
-        self.validation_steps = self.cal_steps_for_epoch(self.img_validation_iters)
+        self.validation_steps = self.img_validation_iters.samples
         return self.steps_per_epoch, self.validation_steps
 
     def cal_steps_for_epoch(self, iters):
