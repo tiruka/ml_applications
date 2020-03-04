@@ -66,6 +66,7 @@ class PredictSuperResolution(SuperResolution, ImageStore):
     def __init__(self):
         self.model = self.build_model()
         self.model_name = 'super_resolution_model'
+        self._load_model()
 
     def predict(self, path):
         original = self._load_img(path)
