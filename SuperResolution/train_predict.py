@@ -81,7 +81,7 @@ class PredictSuperResolution(SuperResolution, ImageStore):
         self.model.load_weights(os.path.join(settings.MODEL, f'{self.model_name}.h5'))
 
     def _load_img(self, path):
-        img_np = img_to_array(load_img(path, target_size=(settings.SIZE)))
+        img_np = img_to_array(load_img(path))
         return np.expand_dims(img_np, axis=0) / 255.
 
 
