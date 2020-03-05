@@ -59,8 +59,10 @@ class TrainDAE(DAE, ImageStore):
 
 class PredictDAE(DAE, ImageStore):
     
-    def __init__(self):
+    def __init__(self, mode='gaussian'):
+        self.mode = mode
         self.autoencoder, _ = self.build_model()
+        self._load_model()
 
     def predict(self, path):
         X = self._load_img(path)

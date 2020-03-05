@@ -90,6 +90,7 @@ class PredictAutoColor(AutoColorEncoder, ImageStore):
     
     def __init__(self):
         self.autoencoder = self.build_model()
+        self._load_model()
 
     def predict(self, path):
         rgb = img_to_array(load_img(path, target_size=settings.SIZE)).astype(np.uint8) # shape (224, 224, 3)
@@ -104,3 +105,6 @@ class PredictAutoColor(AutoColorEncoder, ImageStore):
         auto_colored_image = preds_rgp
         np_img_list = [gray_image, auto_colored_image, rgb]
         self.save(datetime.now().strftime('%Y%m%d%H%M%S'), np_img_list)
+
+    def _load_model(self):
+        self.autoencoder.load_weights(os.path.join(settings.MODEL, 'auto_color_model.h5'))
