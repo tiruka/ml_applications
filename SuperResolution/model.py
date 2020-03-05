@@ -54,7 +54,7 @@ class SuperResolutionWithSkipConnections(SuperResolution):
         deconv1 = Conv2DTranspose(filters=64, kernel_size=3, padding='same')(merge_1)
         deconv1 = Conv2DTranspose(filters=3, kernel_size=3, padding='same')(deconv1)
         outputs = Add()([deconv1, inputs])
-        model = Model(inputs, outputs)
+        model = Model(inputs=inputs, outputs=outputs)
         model.compile(optimizer='adam', loss='mean_squared_error', metrics=[self.psnr])
         # model.summary()
         return model
