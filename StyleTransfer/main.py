@@ -10,6 +10,7 @@ class Initializer:
     
     def cleanup(self):
         self._clean_files('png')
+        self._clean_files('jpg')
         self._clean_files('h5')
 
     def _clean_files(self, mode='png'):
@@ -23,7 +24,7 @@ if __name__ == "__main__":
         raise Exception('Please add args')
     args = frozenset(argv)
     if 'train' in args:
-        # Initializer().cleanup()
+        Initializer().cleanup()
         TrainStyleTransfer().train()
     elif 'predict' in args:
         PredictStyleTransfer().predict(argv[2])
