@@ -1,6 +1,7 @@
 import os
 import glob
 import math
+import pickle
 import random
 
 import numpy as np
@@ -112,13 +113,13 @@ def load_images(image_path_list, target_size):
     image_list = [np.expand_dims(_load_img(path), axis=0) for path in image_path_list]
     return np.concatenate(image_list, axis=0)
 
-def train_generator(image_path_list, batch_size, model, y_true_style, shuffle=True, epochs=10):
+def train_generator(image_path_list, model, y_true_style, shuffle=True, epochs=10):
     '''
     Generate train data
     '''
     n_samples = len(image_path_list)
     indices = [i for i in range(n_samples)]
-    steps_per_epochs = math.ceil(n_samples / batch_size)
+    steps_per_epochs = math.ceil(n_samples / settings.BATCH_SIZE)
     image_path_ndarray = np.array(image_path_list)
     count_epochs = 0
     while True:
@@ -126,8 +127,8 @@ def train_generator(image_path_list, batch_size, model, y_true_style, shuffle=Tr
         if shuffle:
             np.random.shuffle(indices)
         for i in range(steps_per_epochs):
-            start = batch_size * i
-            end = batch_size * (i + 1)
+            start = settings.BATCH_SIZE * i
+            end = settings.BATCH_SIZE * (i + 1)
             X = load_images(image_path_ndarray[indices[start:end]])
             batch_size_act = X.shape[0]
             y_true_style_t = [np.repeat(feat, batch_size_act, axis=0) for feat in y_true_style]
@@ -135,10 +136,10 @@ def train_generator(image_path_list, batch_size, model, y_true_style, shuffle=Tr
             yield X, y_true_style_t + [y_true_contents]
 
 
-
+image_path_list = ''
 gen = train_generator(
-    image_path_list,
-    batch_size,
+    settings.DATA,
+    settings.BATCH_SIZE,
     model_contents,
     y_true_style,
     epochs=10,
@@ -179,3 +180,34 @@ model.compile(optimizer=Adadelta(),
               loss=[style_loss, style_loss, style_loss, style_loss, feature_loss],
               loss_weights=[1.0, 1.0, 1.0, 1.0, 3.0])
 
+
+img_test = load_img(path, target_size=input_shape[:2])
+img_arr_test = np.expand_dims(img_to_array(img_test), axis=0)
+
+
+steps_per_epochs = math.ceil(len(image_path_list) // settings.BATCH_SIZE)
+iters_vobose = 1000
+iters_save_img = 1000
+iters_save_model = 1000
+
+cur_epoch = 0
+losses = []
+path_tmp = 'epoch_{}_iters_{}_loss_{:.2f}_{}'
+for i, (x_train, y_train) in enumerate(gen):
+    if i % steps_per_epochs == 0:
+        cur_epoch += 1
+    loss = model.train_on_batch(x_train, y_train)
+    losses.append(loss)
+    if i % iters_vobose == 0:
+        print('epoch:{}\titers:{}\tloss:{:.2f}'.format(cur_epoch, i, loss[0]))
+    if i % iters_save_img == 0:
+        pred = model_gen.predict(img_arr_test)
+        img_pred = array_to_img(pred.squeeze())
+        path_trs_img = path_tmp.format(cur_epoch, i, loss[0], '.jpg')
+        img_pred.save(os.path.join(setting.DEBUG_IMG, path_trs_img))
+        print('saved {}'.format(path_trs_img))
+    if i % iters_save_model == 0:
+        model.save(os.path.join(settings.MODEL, path_tmp.format(cur_epoch, i, loss[0], '.h5')))
+        path_loss = os.path.join(settings.LOG, 'loss.pkl')
+        with open(path_loss, 'wb') as f:
+            pickle.dump(losses, f)
