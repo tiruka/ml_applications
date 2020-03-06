@@ -28,7 +28,6 @@ class DataLoader(object):
         image_path_list = glob.glob(os.path.join(settings.DATA, '*.jpg'))
         gen = self.train_generator(
             image_path_list,
-            settings.BATCH_SIZE,
             y_true_style,
             epochs=10,
         )
@@ -56,6 +55,9 @@ class DataLoader(object):
                 y_true_style_t = [np.repeat(feat, batch_size_act, axis=0) for feat in y_true_style]
                 y_true_contents = self.model_contents.predict(X)
                 yield X, y_true_style_t + [y_true_contents]
+            if epochs is not None:
+                if count_epochs >= epochs:
+                    raise StopIteration
 
     def load_images(self, image_path_list):
         '''

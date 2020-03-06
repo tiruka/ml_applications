@@ -1,4 +1,5 @@
 import os
+import pickle
 from datetime import datetime
 import math
 
@@ -33,7 +34,9 @@ class ImageStore:
 class TrainStyleTransfer(ImageStore):
 
     def __init__(self, epochs=10):
-        self.model = StyleTransfer().build_model()
+        st = StyleTransfer()
+        self.model = st.build_model()
+        self.model_gen = st.build_encoder_decoder()
         self.loader = DataLoader()
         self.epochs = epochs
 
@@ -51,22 +54,22 @@ class TrainStyleTransfer(ImageStore):
 
         cur_epoch = 0
         losses = []
-        path_tmp = 'epoch_{}_iters_{}_loss_{:.2f}_{}'
+        path_tmp = 'epoch_{}_iters_{}_loss_{:.2f}{}'
         for i, (x_train, y_train) in enumerate(gen):
             if i % steps_per_epochs == 0:
                 cur_epoch += 1
-            loss = model.train_on_batch(x_train, y_train)
+            loss = self.model.train_on_batch(x_train, y_train)
             losses.append(loss)
             if i % iters_vobose == 0:
                 print('epoch:{}\titers:{}\tloss:{:.2f}'.format(cur_epoch, i, loss[0]))
             if i % iters_save_img == 0:
-                pred = model_gen.predict(img_arr_test)
+                pred = self.model_gen.predict(img_arr_test)
                 img_pred = array_to_img(pred.squeeze())
                 path_trs_img = path_tmp.format(cur_epoch, i, loss[0], '.jpg')
-                img_pred.save(os.path.join(setting.DEBUG_IMG, path_trs_img))
+                img_pred.save(os.path.join(settings.DEBUG_IMG, path_trs_img))
                 print('saved {}'.format(path_trs_img))
             if i % iters_save_model == 0:
-                model.save(os.path.join(settings.MODEL, path_tmp.format(cur_epoch, i, loss[0], '.h5')))
+                self.model.save(os.path.join(settings.MODEL, path_tmp.format(cur_epoch, i, loss[0], '.h5')))
                 path_loss = os.path.join(settings.LOG, 'loss.pkl')
                 with open(path_loss, 'wb') as f:
                     pickle.dump(losses, f)
