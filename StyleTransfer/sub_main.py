@@ -81,7 +81,7 @@ for layer in vgg16.layers: # Recontructing network by piling up
 model = Model(inputs=model_gen.input, outputs=style_outputs_gen + contents_outputs_gen)
 
 
-img_arr_style = np.expand_dims(array_to_img(load_img(path, target_size=input_shape[:2])), axis=0)
+img_arr_style = np.expand_dims(array_to_img(load_img(settings.Style, target_size=input_shape[:2])), axis=0)
 style_outputs = []
 input_style = Input(shape=input_shape, name='input_style')
 x = Lambda(norm_vgg16)(input_style)

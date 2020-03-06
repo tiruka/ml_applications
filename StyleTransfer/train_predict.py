@@ -37,19 +37,38 @@ class TrainStyleTransfer(StyleTransfer, ImageStore):
         self.epochs = epochs
 
     def train(self):
-        train_gen, val_gen = self.loader.load_data()
-        train_steps, val_steps = self.loader.pre_calculation()
-        self._train(train_gen, train_steps, val_gen, val_steps)
+        gen = self.loader.load_data()
+        self._train(gen)
 
-    def _train(self, train_gen, train_steps, val_gen, val_steps):
-        self.model.fit_generator(
-            generator=train_gen,
-            steps_per_epoch=train_steps,
-            epochs=self.epochs,
-            validation_data=val_gen,
-            validation_steps=val_steps,
-        )
-        self.model.save_weights(os.path.join(settings.MODEL, 'super_resolution_model.h5'))
+    def _train(self, gen):
+        img_test = load_img(path, target_size=input_shape[:2])
+        img_arr_test = np.expand_dims(img_to_array(img_test), axis=0)
+        steps_per_epochs = math.ceil(len(image_path_list) // settings.BATCH_SIZE)
+        iters_vobose = 1000
+        iters_save_img = 1000
+        iters_save_model = 1000
+
+        cur_epoch = 0
+        losses = []
+        path_tmp = 'epoch_{}_iters_{}_loss_{:.2f}_{}'
+        for i, (x_train, y_train) in enumerate(gen):
+            if i % steps_per_epochs == 0:
+                cur_epoch += 1
+            loss = model.train_on_batch(x_train, y_train)
+            losses.append(loss)
+            if i % iters_vobose == 0:
+                print('epoch:{}\titers:{}\tloss:{:.2f}'.format(cur_epoch, i, loss[0]))
+            if i % iters_save_img == 0:
+                pred = model_gen.predict(img_arr_test)
+                img_pred = array_to_img(pred.squeeze())
+                path_trs_img = path_tmp.format(cur_epoch, i, loss[0], '.jpg')
+                img_pred.save(os.path.join(setting.DEBUG_IMG, path_trs_img))
+                print('saved {}'.format(path_trs_img))
+            if i % iters_save_model == 0:
+                model.save(os.path.join(settings.MODEL, path_tmp.format(cur_epoch, i, loss[0], '.h5')))
+                path_loss = os.path.join(settings.LOG, 'loss.pkl')
+                with open(path_loss, 'wb') as f:
+                    pickle.dump(losses, f)
 
 
 class PredictStyleTransfer(StyleTransfer, ImageStore):

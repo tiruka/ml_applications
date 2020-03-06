@@ -13,6 +13,7 @@ from keras.preprocessing.image import (
     ImageDataGenerator
 )
 
+from model import Contents, Style
 import settings
 
 class DataLoader(object):
@@ -20,44 +21,37 @@ class DataLoader(object):
     def __init__(self):
         self.batch_size = settings.BATCH_SIZE
         self.img_train_iters = self.img_validation_iters = None
+        self.model_contents = Contents().build_model()
+        self.model_style = Style()
 
     def load_data(self):
-        self.set_iters()
-        train_gen = self.data_generator(self.img_train_iters)
-        val_gen = self.data_generator(self.img_validation_iters)
-        return train_gen, val_gen
-
-    def set_iters(self):
-        self.img_train_iters = self._create_img_iters(settings.DATA, 'train')
-        self.img_validation_iters = self._create_img_iters(settings.DATA, 'val', shuffle=False)
-
-    def pre_calculation(self):
-        self.steps_per_epoch = self.cal_steps_for_epoch(self.img_train_iters)
-        self.validation_steps = self.cal_steps_for_epoch(self.img_validation_iters)
-        return self.steps_per_epoch, self.validation_steps
-
-    def cal_steps_for_epoch(self, iters):
-        return math.ceil(iters.samples / self.batch_size)
-
-    def drop_resolution(self, x, scale=3.0):
-        # resize to small and resize to original in order to drop resolution easily.
-        small_size = (int(x.shape[0] / scale), int(x.shape[1] / scale))
-        img = array_to_img(x)
-        small_img = img.resize(small_size)
-        return img_to_array(small_img.resize(img.size, 3))
-
-    def _create_img_iters(self, data_dir, mode, shuffle=True):
-        return ImageDataGenerator().flow_from_directory(
-            directory=data_dir,
-            classes=[mode],
-            class_mode=None,
-            color_mode='rgb',
-            target_size=settings.SIZE,
-            batch_size=self.batch_size,
-            shuffle=shuffle
+        y_true_style = self.model_style.predict()
+        gen = self.train_generator(
+            settings.DATA,
+            settings.BATCH_SIZE,
+            y_true_style,
+            epochs=10,
         )
+        return gen
 
-    def data_generator(self, iters, scale=2.0, shuffle=True):
-        for images in iters:
-            x = np.array([self.drop_resolution(img, scale) for img in images])
-            yield x / 255., images / 255.
+    def train_generator(self, image_path_list, y_true_style, shuffle=True, epochs=10):
+        '''
+        Generate train data
+        '''
+        n_samples = len(image_path_list)
+        indices = [i for i in range(n_samples)]
+        steps_per_epochs = math.ceil(n_samples / settings.BATCH_SIZE)
+        image_path_ndarray = np.array(image_path_list)
+        count_epochs = 0
+        while True:
+            count_epochs += 1
+            if shuffle:
+                np.random.shuffle(indices)
+            for i in range(steps_per_epochs):
+                start = settings.BATCH_SIZE * i
+                end = settings.BATCH_SIZE * (i + 1)
+                X = load_images(image_path_ndarray[indices[start:end]])
+                batch_size_act = X.shape[0]
+                y_true_style_t = [np.repeat(feat, batch_size_act, axis=0) for feat in y_true_style]
+                y_true_contents = self.model_contents.predict(X)
+                yield X, y_true_style_t + [y_true_contents]

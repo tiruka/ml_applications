@@ -6,7 +6,8 @@ DEBUG_IMG = os.path.join(VAR_DIR, 'debug_img')
 COMPARABLE_IMG = os.path.join(VAR_DIR, 'comparable_img')
 MODEL = os.path.join(VAR_DIR, 'model')
 LOG = os.path.join(VAR_DIR, 'log')
-DATA = os.path.join(BASE_DIR, 'data')
+DATA = os.path.join(BASE_DIR, 'data', 'train')
+STYLE_IMAGE = os.path.join(DATA, 'style.jpg')
 
-SIZE = (224, 224)
+INPUT_SHAPE = (224, 224, 3)
 BATCH_SIZE = 32
