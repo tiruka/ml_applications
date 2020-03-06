@@ -20,14 +20,14 @@ class DataLoader(object):
 
     def __init__(self):
         self.batch_size = settings.BATCH_SIZE
-        self.img_train_iters = self.img_validation_iters = None
         self.model_contents = Contents().build_model()
         self.model_style = Style()
 
     def load_data(self):
         y_true_style = self.model_style.predict()
+        image_path_list = glob.glob(settings.DATA, '*.jpg')
         gen = self.train_generator(
-            settings.DATA,
+            image_path_list,
             settings.BATCH_SIZE,
             y_true_style,
             epochs=10,

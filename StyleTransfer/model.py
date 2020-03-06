@@ -9,7 +9,10 @@ from keras.layers import Lambda, BatchNormalization, Conv2D, BatchNormalization,
 from keras.applications import VGG16
 from keras.optimizers import Adadelta
 
-import settings
+from settings import(
+    INPUT_SHAPE,
+    STYLE_IMAGE,
+)
 
 
 class CommonModel:
@@ -41,7 +44,7 @@ class StyleTransfer(CommonModel):
         # Creating Residual Block
         x = Conv2D(filters=128, kernel_size=(3, 3), strides=1, padding='same')(input_tensor)
         x = BatchNormalization()(x)
-        x = Activation()(x)
+        x = Activation('relu')(x)
         x = Conv2D(filters=128, kernel_size=(3, 3), strides=1, padding='same')(x)
         x = BatchNormalization()(x)
         return Add()([x, input_tensor])
@@ -66,11 +69,10 @@ class StyleTransfer(CommonModel):
         x = Activation('relu')(x)
         x = Conv2DTranspose(filters=3, kernel_size=(3, 3), strides=2, padding='same')(x)
         x = BatchNormalization()(x)
-        x = Activation('tahn')(x)
-        outputs = Lambda(lambda x: (x + 1) * 127.5) # transform outputs to [0, 255]
+        x = Activation('tanh')(x)
+        outputs = Lambda(lambda x: (x + 1) * 127.5)(x) # transform outputs to [0, 255]
         model_gen = Model(inputs=input_tensor, outputs=outputs)
         return model_gen
-
 
     def feature_loss(self, y_true, y_pred):
         '''
@@ -103,8 +105,8 @@ class StyleTransfer(CommonModel):
         style_outputs_gen = []
         contents_outputs_gen = []
         input_gen = model_gen.output # inputs will come from stlyle-transform model
-        z = Lambda(norm_vgg16)(input_gen)
-        for layer in vgg16.layers: # Recontructing network by piling up 
+        z = Lambda(self.norm_vgg16)(input_gen)
+        for layer in self.vgg16.layers: # Recontructing network by piling up 
             z = layer(z)
             if layer.name in cls.style_layer_names:
                 style_outputs_gen.append(z)
@@ -148,7 +150,7 @@ class Style(CommonModel):
         self.model = self.build_model()
 
     def build_model(self):
-        img_arr_style = np.expand_dims(array_to_img(load_img(settings.STYLE_IMAGE, target_size=INPUT_SHAPE[:2])), axis=0)
+        img_arr_style = np.expand_dims(array_to_img(load_img(STYLE_IMAGE, target_size=INPUT_SHAPE[:2])), axis=0)
         style_outputs = []
         input_style = Input(shape=INPUT_SHAPE, name='input_style')
         x = Lambda(self.modelnorm_vgg16)(input_style)

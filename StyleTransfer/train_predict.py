@@ -29,10 +29,10 @@ class ImageStore:
             pos_x += im.width
         return dst
 
-class TrainStyleTransfer(StyleTransfer, ImageStore):
+class TrainStyleTransfer(ImageStore):
 
     def __init__(self, epochs=10):
-        self.model = self.build_model()
+        self.model = StyleTransfer().build_model()
         self.loader = DataLoader()
         self.epochs = epochs
 
