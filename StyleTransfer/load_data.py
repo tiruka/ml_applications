@@ -20,19 +20,20 @@ class DataLoader(object):
 
     def __init__(self):
         self.batch_size = settings.BATCH_SIZE
-        self.img_train_iters = self.img_validation_iters = None
         self.model_contents = Contents().build_model()
         self.model_style = Style()
 
     def load_data(self):
         y_true_style = self.model_style.predict()
+        image_path_list = glob.glob(os.path.join(settings.DATA, '*.jpg'))
         gen = self.train_generator(
-            settings.DATA,
+            image_path_list,
             settings.BATCH_SIZE,
             y_true_style,
             epochs=10,
         )
-        return gen
+        return gen, image_path_list
+
 
     def train_generator(self, image_path_list, y_true_style, shuffle=True, epochs=10):
         '''
@@ -50,8 +51,16 @@ class DataLoader(object):
             for i in range(steps_per_epochs):
                 start = settings.BATCH_SIZE * i
                 end = settings.BATCH_SIZE * (i + 1)
-                X = load_images(image_path_ndarray[indices[start:end]])
+                X = self.load_images(image_path_ndarray[indices[start:end]])
                 batch_size_act = X.shape[0]
                 y_true_style_t = [np.repeat(feat, batch_size_act, axis=0) for feat in y_true_style]
                 y_true_contents = self.model_contents.predict(X)
                 yield X, y_true_style_t + [y_true_contents]
+
+    def load_images(self, image_path_list):
+        '''
+        Return batch of array from image_path_list
+        '''
+        _load_img = lambda x: img_to_array(load_img(x, target_size=settings.INPUT_SHAPE[:2]))
+        image_list = [np.expand_dims(_load_img(path), axis=0) for path in image_path_list]
+        return np.concatenate(image_list, axis=0)

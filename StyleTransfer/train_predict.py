@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import math
 
 import numpy as np
 from PIL import Image, ImageOps
@@ -29,19 +30,19 @@ class ImageStore:
             pos_x += im.width
         return dst
 
-class TrainStyleTransfer(StyleTransfer, ImageStore):
+class TrainStyleTransfer(ImageStore):
 
     def __init__(self, epochs=10):
-        self.model = self.build_model()
+        self.model = StyleTransfer().build_model()
         self.loader = DataLoader()
         self.epochs = epochs
 
     def train(self):
-        gen = self.loader.load_data()
-        self._train(gen)
+        gen, image_path_list = self.loader.load_data()
+        self._train(gen, image_path_list)
 
-    def _train(self, gen):
-        img_test = load_img(path, target_size=input_shape[:2])
+    def _train(self, gen, image_path_list):
+        img_test = load_img(settings.TEST_IMAGE, target_size=settings.INPUT_SHAPE[:2])
         img_arr_test = np.expand_dims(img_to_array(img_test), axis=0)
         steps_per_epochs = math.ceil(len(image_path_list) // settings.BATCH_SIZE)
         iters_vobose = 1000
