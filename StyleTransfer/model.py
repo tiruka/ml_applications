@@ -57,7 +57,11 @@ class StyleTransfer(CommonModel):
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
         x = Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='same')(x)
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
         x = Conv2D(filters=128, kernel_size=(3, 3), strides=2, padding='same')(x)
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
         for _ in range(5): # Add five residual blocks
             x = self.residual_block(x)
         # Decoder
@@ -71,7 +75,7 @@ class StyleTransfer(CommonModel):
         x = BatchNormalization()(x)
         x = Activation('tanh')(x)
         outputs = Lambda(lambda x: (x + 1) * 127.5)(x) # transform outputs to [0, 255]
-        model_gen = Model(inputs=input_tensor, outputs=outputs)
+        model_gen = Model(inputs=[input_tensor], outputs=[outputs])
         return model_gen
 
     def feature_loss(self, y_true, y_pred):
@@ -104,7 +108,7 @@ class StyleTransfer(CommonModel):
         model_gen = self.build_encoder_decoder()
         style_outputs_gen = []
         contents_outputs_gen = []
-        input_gen = model_gen.input # inputs will come from stlyle-transform model
+        input_gen = model_gen.output # inputs will come from stlyle-transform model
         z = Lambda(self.norm_vgg16)(input_gen)
         for layer in self.vgg16.layers: # Recontructing network by piling up
             z = layer(z)
