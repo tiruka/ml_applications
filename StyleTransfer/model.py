@@ -76,7 +76,18 @@ class StyleTransfer(CommonModel):
         x = Activation('tanh')(x)
         outputs = Lambda(lambda x: (x + 1) * 127.5)(x) # transform outputs to [0, 255]
         model_gen = Model(inputs=[input_tensor], outputs=[outputs])
+        gen_output_layer = model_gen.layers[-1]
+        tv_loss = self.TVRegularizer(gen_output_layer.output)
+        gen_output_layer.add_loss(tv_loss)
         return model_gen
+
+    def TVRegularizer(self, x, weight=1e-6, beta=1.0):
+        # Total Variation Regularizer
+        delta = 1e-8
+        h, w = INPUT_SHAPE[:2]
+        d_h = K.square(x[:, :h - 1, :w - 1, :] - x[:, 1:, :w - 1, :])
+        d_w = K.square(x[:, :h - 1, :w - 1, :] - x[:, :h - 1, 1:, :])
+        return weight * K.mean(K.sum(K.pow(d_h + d_w + delta, beta/2.)))
 
     def feature_loss(self, y_true, y_pred):
         '''
