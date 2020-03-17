@@ -71,7 +71,7 @@ class StyleTransfer(CommonModel):
         x = Conv2DTranspose(filters=32, kernel_size=(3, 3), strides=2, padding='same')(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Conv2DTranspose(filters=3, kernel_size=(3, 3), strides=2, padding='same')(x)
+        x = Conv2DTranspose(filters=3, kernel_size=(9, 9), strides=1, padding='same')(x)
         x = BatchNormalization()(x)
         x = Activation('tanh')(x)
         outputs = Lambda(lambda x: (x + 1) * 127.5)(x) # transform outputs to [0, 255]
@@ -79,6 +79,7 @@ class StyleTransfer(CommonModel):
         gen_output_layer = model_gen.layers[-1]
         tv_loss = self.TVRegularizer(gen_output_layer.output)
         gen_output_layer.add_loss(tv_loss)
+        # model_gen.summary()
         return model_gen
 
     def TVRegularizer(self, x, weight=1e-6, beta=1.0):

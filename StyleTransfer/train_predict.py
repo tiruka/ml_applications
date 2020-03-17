@@ -47,10 +47,10 @@ class TrainStyleTransfer(ImageStore):
     def _train(self, gen, image_path_list):
         img_test = load_img(settings.TEST_IMAGE, target_size=settings.INPUT_SHAPE[:2])
         img_arr_test = np.expand_dims(img_to_array(img_test), axis=0)
-        steps_per_epochs = math.ceil(len(image_path_list) // settings.BATCH_SIZE)
+        steps_per_epochs = math.ceil(len(image_path_list) / settings.BATCH_SIZE)
         iters_vobose = 1000
         iters_save_img = 1000
-        iters_save_model = 1000
+        iters_save_model = steps_per_epochs
 
         cur_epoch = 0
         losses = []
