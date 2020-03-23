@@ -11,4 +11,4 @@ STYLE_IMAGE = os.path.join(BASE_DIR, 'data', 'style', 'style.jpg')
 TEST_IMAGE = os.path.join(BASE_DIR, 'data', 'test', 'test.jpg')
 
 INPUT_SHAPE = (224, 224, 3)
-BATCH_SIZE = 32
+BATCH_SIZE = 2
